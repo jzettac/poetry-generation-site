@@ -149,6 +149,10 @@ class Poem:
 
     def handle_line_punctuation(self):
         pass
+        # replace commas (and others eg :) with period
+        # if none, add period
+        # keep ?, !, --
+        # either do this with sets or w regex, tbd
 
     def generate_stanza(self):
         stanza_list = []
@@ -179,7 +183,20 @@ class Poem:
         # use the selected word to grab the non-rhyming line.
         # get a totally random word for the rhyming stanza and do that thing. 
         # or a couplets thing!
-            pass
+
+            # or: two random couplets;
+            # followed by a random line with the word in it
+            lines_with_word = [line['s'] for line in self.all_lines if re.search(fr"\b{self.seed_word}\b", line['s'], re.I)]
+            # random_line = random.choice(lines_with_word)
+            rhyme_groups = [group for group in self.by_rhyming_part.values() if len(group) >= 2]
+            # Use Allison's example of grabbing some couplets to grab 2
+            for i in range(2):
+                group = random.choice(rhyme_groups)
+                words = random.sample(list(group.keys()), 2)
+                stanza_list.append(random.choice(group[words[0]]))
+                stanza_list.append(random.choice(group[words[1]]))
+            # Then append a random line with the seed word
+            stanza_list.append(random.choice(lines_with_word) + ".")
 
         return stanza_list
 
@@ -215,8 +232,13 @@ class Poem:
 
 # TODO: indicate why a word doesn't generate a poem if it doesn't?
 # TODO the else
-p = Poem("bird")
+p = Poem("alien")
 print(p)
+
+
+# TODO: use seed word (??? maybe?) to generate a title
+# or: use a common word ??? with > ?? chars?? in the poem string itself to generate a title?
+# Anyway some way to generate and store a title
 
 
 
