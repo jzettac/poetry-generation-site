@@ -29,9 +29,6 @@ def generate_poem():
     """Post and generate poem."""
     source_word = request.forms.get('source_word')
     # TODO: "Art takes time..."
-    # if max_len and int(max_len) > 33: # Now introducing randomness in the generator among options
-    #     p = Poem(source_word, max_line_len=int(max_len))
-    # else:
     p = Poem(source_word)
     return p.site_rep()
 
