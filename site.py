@@ -1,5 +1,12 @@
-from bottle import route, run, get, post, request, error, template
+from bottle import route, run, get, post, request, error, template, static_file
 from poetry import Poem
+
+# Static files CSS
+@route('/static/css/<filename:re:.*\.css>')
+def send_css(filename):
+    return static_file(filename, root='static/css')
+
+# Routes
 
 @get('/') 
 def poem():
@@ -22,6 +29,7 @@ def generate_poem():
 # @error(500)
 # def error500(error):
 #     return 'There was a problem generating your poem. :(<br> Try again with a different word! <a href="/">Home.</a>'
+
 
 # Main
 
