@@ -20,8 +20,9 @@ def generate_poetry_corpus_lines() -> List:
 
 class Poem:
     def __init__(self, seed_word, min_line_len=32, max_line_len=48):
+        max_line_choices = [48, 65, 80, 120]
         self.all_lines = generate_poetry_corpus_lines()
-        self.by_rhyming_part = self.generate_rhyming_part_defaultdict(min_line_len,max_line_len)
+        self.by_rhyming_part = self.generate_rhyming_part_defaultdict(min_line_len,random.choice(max_line_choices))
         # Set up ability to seed by word, TODO neaten
         self.seed_word = seed_word.lower()
         phones = pronouncing.phones_for_word(self.seed_word)[0]
@@ -59,7 +60,7 @@ class Poem:
 
     def handle_line_punctuation(self, line, title=False):
         """Handles line-end punctuation for some fun verse finality"""
-        replace_set = ",:;"
+        replace_set = ",:;'\""
         maintain_set = "-!?."
         if not title:
             if line[-1] in replace_set:
@@ -69,14 +70,22 @@ class Poem:
             else:
                 return line + "."
         else:
-            if line[-1].isalpha():
-                return line.replace('"','').replace("'","")
-            else:
-                return line[:-1].replace('"','').replace("'","")
+            fixed = ""
+            for ch in line:
+                if ch in replace_set or ch in maintain_set:
+                    continue
+                else:
+                    fixed += ch
+            return fixed
+            # if line[-1].isalpha():
+            #     return line.replace('"','').replace("'","")
+            # else:
+            #     return line[:-1].replace('"','').replace("'","")
         
     def generate_title(self):
         lines_with_the = [line['s'] for line in self.all_lines if re.search(r"\bthe\b", line['s'], re.I)]
         self.title = self.handle_line_punctuation(random.choice(lines_with_the), title=True)
+        # TODO: remove stopwords from nltk from end of any title str
 
     def generate_stanza(self):
         """Generates one poem stanza via complicated/silly rules"""
