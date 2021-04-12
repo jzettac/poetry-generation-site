@@ -6,8 +6,6 @@ import markovify
 from collections import defaultdict
 from typing import List
 
-# TODO: major refactor lol lol
-
 ## Helper functions (largely from aparrish's examples)
 
 def generate_poetry_corpus_lines() -> List:
@@ -18,107 +16,20 @@ def generate_poetry_corpus_lines() -> List:
         all_lines.append(json.loads(line.strip()))
     return all_lines
 
-def generate_rhyming_part_defaultdict() -> defaultdict:
-    """Returns a default dict structure of 
-    keys: Rhyming parts (strs)
-    values: defaultdicts,
-    of words corresponding to that rhyming part (strs)
-    : lists of lines that end with those words (lists of strs)"""
-    all_lines = generate_poetry_corpus_lines()
-    by_rhyming_part = defaultdict(lambda: defaultdict(list))
-    for line in all_lines:
-        text = line['s']
-        if not(32 < len(text) < 48): # only use lines of uniform lengths
-            continue
-        match = re.search(r'(\b\w+\b)\W*$', text)
-        if match:
-            last_word = match.group()
-            pronunciations = pronouncing.phones_for_word(last_word)
-            if len(pronunciations) > 0:
-                rhyming_part = pronouncing.rhyming_part(pronunciations[0])
-                # group by rhyming phones (for rhymes) and words (to avoid duplicate words)
-                by_rhyming_part[rhyming_part][last_word.lower()].append(text)
-    return by_rhyming_part
-
-def get_random_line() -> str:
-    """Returns a random line from the poetry corpus"""
-    all_lines = generate_poetry_corpus_lines()
-    lines = [line['s'] for line in all_lines]
-    return random.choice(lines) # For example, a string: "And his nerves thrilled like throbbing violins"
-
 #####
 
-# # get defaultdict of rhymes
-# by_rhyming_part = generate_rhyming_part_defaultdict()
-
-# # TODO: get a random word, or a word from user input
-# # For now: input word with typing
-# selected_word = "other" #"grandmother"
-# phones = pronouncing.phones_for_word(selected_word)[0]
-# rhyming_part_for_word = pronouncing.rhyming_part(phones)
-
-# TODO: maybe 1 selected word for non rhyming? and 1 for rhymes?
-# So like, get couplets from selected word and then get random things about another word for lines between the couplets?
-
-# TODO: shuffle the rhymes so it's not always in the same order
-
-# Check whether seletcted word's rhyme part has > 1 word
-# if rhyming_part_for_word in by_rhyming_part.keys():
-# print("check!!", type(by_rhyming_part[rhyming_part_for_word]))
-
-    
-
-
-####
-
-# Poetry generation
-
-def generate_stanza():
-    # If there are at least 2 different words to rhyme from this word,
-    if len(by_rhyming_part[rhyming_part_for_word].keys()) > 2:
-        rhyming_options = list(by_rhyming_part[rhyming_part_for_word].keys())
-        random.shuffle(rhyming_options)
-        for k in rhyming_options:
-            # print(k) # word in rhyme group - a string
-            # print(by_rhyming_part[rhyming_part_for_word][k]) # list of sentences that each end in word k
-            print(random.choice(by_rhyming_part[rhyming_part_for_word][k]))
-        # TODO: Do this ^ two or three times (for 3 words k) but not more
-        # Then follow with a (random) other line.
-        # TODO generate random line here.
-        random_line = get_random_line()
-        print(random_line + ".") # TODO: only add . when it isn't already a period or -,
-        # TODO: if it's a comma, remove the comma at end and replace with period (?)
-
-    # But if there aren't, 
-    else:
-    # use the selected word to grab the non-rhyming line.
-        pass
-
-
-# def generate_poem():
-#     # TODO: shouldn't be the _same_ word or lines intially
-#     # should just be like...seeded by it? Have to decide now to 'choose' next stanza material
-#     generate_stanza()
-#     generate_stanza()
-#     generate_stanza()
-
-# # TODO: if the stanzas are long, they get fewer
-
-
-# generate_poem()
-
-
-
 class Poem:
-    def __init__(self, seed_word):
+    def __init__(self, seed_word, min_line_len=32, max_line_len=48):
         self.all_lines = generate_poetry_corpus_lines()
-        self.by_rhyming_part = self.generate_rhyming_part_defaultdict()
+        self.by_rhyming_part = self.generate_rhyming_part_defaultdict(min_line_len,max_line_len)
         # Set up ability to seed by word, TODO neaten
         self.seed_word = seed_word
         phones = pronouncing.phones_for_word(self.seed_word)[0]
         self.rhyming_part_for_word = pronouncing.rhyming_part(phones)
+        # self.min_line_len = min_line_len
+        # self.max_line_len = max_line_len
 
-    def generate_rhyming_part_defaultdict(self) -> defaultdict:
+    def generate_rhyming_part_defaultdict(self, min_len, max_len) -> defaultdict:
         """Returns a default dict structure of 
         keys: Rhyming parts (strs)
         values: defaultdicts,
@@ -128,9 +39,8 @@ class Poem:
         by_rhyming_part = defaultdict(lambda: defaultdict(list))
         for line in self.all_lines:
             text = line['s']
-            # TODO: potentially - select line length input options
             # Uniform lengths original: if not(32 < len(text) < 48)
-            if not(32 < len(text) < 100): # only use lines of uniform lengths
+            if not(min_len < len(text) < max_len): # only use lines of uniform lengths
                 continue
             match = re.search(r'(\b\w+\b)\W*$', text)
             if match:
@@ -147,14 +57,20 @@ class Poem:
         lines = [line['s'] for line in self.all_lines]
         return random.choice(lines) # For example, a string: "And his nerves thrilled like throbbing violins"
 
-    def handle_line_punctuation(self):
-        pass
-        # replace commas (and others eg :) with period
-        # if none, add period
-        # keep ?, !, --
-        # either do this with sets or w regex, tbd
+    def handle_line_punctuation(self, line):
+        """Handles line-end punctuation for some fun verse finality"""
+        replace_set = ",:;"
+        maintain_set = "-!?."
+        if line[-1] in replace_set:
+            return line[:-1] + "."
+        elif line[-1] in maintain_set:
+            return line
+        else:
+            return line + "."
+        
 
     def generate_stanza(self):
+        """Generates one poem stanza via complicated/silly rules"""
         stanza_list = []
 
         # If there are at least 2 different words to rhyme from this word,
@@ -162,32 +78,21 @@ class Poem:
             rhyme_options_source = self.by_rhyming_part[self.rhyming_part_for_word]
             rhyming_options = list(rhyme_options_source.keys())
             random.shuffle(rhyming_options) # Don't always have the words that rhyme in the same order in each stanza
-            if len(rhyming_options) > 8: # Don't have it do more than # rhymes, too many
+            if len(rhyming_options) > 5: # Don't have it do more than # rhymes, too many
                 # TODO: select number here, maybe vary from 3 to 8 or something where possible - as limit, not actual count, using this if stmt
                 # TODO: some randomness in how many per stanza or something???
-                rhyming_options = rhyming_options[:8] # TODO variation here?
+                rhyming_options = rhyming_options[:5] # TODO variation here? Right now needs to be the same number as in if stmt bc indexing, but tbd
             for k in rhyming_options:
-                # print(k) # word in rhyme group - a string
-                # print(by_rhyming_part[rhyming_part_for_word][k]) # list of sentences that each end in word k
-                # print(random.choice(rhyme_options_source[k]))
                 stanza_list.append(random.choice(rhyme_options_source[k]))
             # Then follow with a (random) other line.
-            random_line = get_random_line()
-            # print(random_line + ".") # TODO: only add . when it isn't already a period or -,
-            # TODO: if it's a comma, remove the comma at end and replace with period (?)
-            stanza_list.append(random_line + ".")
+            random_line = self.get_random_line()
+            stanza_list.append(self.handle_line_punctuation(random_line))
 
-        # TODO TODO TODO
         # But if there aren't, 
         else:
-        # use the selected word to grab the non-rhyming line.
-        # get a totally random word for the rhyming stanza and do that thing. 
-        # or a couplets thing!
-
-            # or: two random couplets;
+            # two random couplets; # TODO: decide if there's a more creative thing here
             # followed by a random line with the word in it
             lines_with_word = [line['s'] for line in self.all_lines if re.search(fr"\b{self.seed_word}\b", line['s'], re.I)]
-            # random_line = random.choice(lines_with_word)
             rhyme_groups = [group for group in self.by_rhyming_part.values() if len(group) >= 2]
             # Use Allison's example of grabbing some couplets to grab 2
             for i in range(2):
@@ -196,7 +101,7 @@ class Poem:
                 stanza_list.append(random.choice(group[words[0]]))
                 stanza_list.append(random.choice(group[words[1]]))
             # Then append a random line with the seed word
-            stanza_list.append(random.choice(lines_with_word) + ".")
+            stanza_list.append(self.handle_line_punctuation(random.choice(lines_with_word)))
 
         return stanza_list
 
@@ -213,6 +118,7 @@ class Poem:
         # if len(self.by_rhyming_part[self.rhyming_part_for_word].keys()) <= 3:
 
         # Now: controlling len of stanza and such, but always doing 3
+        # TODO: input to control how many stanzas, or some element of randomness? (at least 2 or 3, not more than 5 or 6?)
         self.full_poem += "\n".join(self.generate_stanza())
         self.full_poem += "\n\n"
         self.full_poem += "\n".join(self.generate_stanza())
@@ -232,7 +138,7 @@ class Poem:
 
 # TODO: indicate why a word doesn't generate a poem if it doesn't?
 # TODO the else
-p = Poem("alien")
+p = Poem("bird")
 print(p)
 
 
