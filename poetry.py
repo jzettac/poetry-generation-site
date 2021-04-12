@@ -83,9 +83,16 @@ class Poem:
             #     return line[:-1].replace('"','').replace("'","")
         
     def generate_title(self):
+        stopwords = ["a","an","the","or","as","of","at","the"] # stopwords that I care about here
         lines_with_the = [line['s'] for line in self.all_lines if re.search(r"\bthe\b", line['s'], re.I)]
-        self.title = self.handle_line_punctuation(random.choice(lines_with_the), title=True)
-        # TODO: remove stopwords from nltk from end of any title str
+        title = self.handle_line_punctuation(random.choice(lines_with_the), title=True)
+        title_list = title.split()
+        if title_list[-2] in stopwords and title_list[-1] in stopwords:
+            self.title = " ".join(title_list[:-2])
+        elif title_list[-1] in stopwords:
+            self.title = " ".join(title_list[:-1])
+        else:
+            self.title = title
 
     def generate_stanza(self):
         """Generates one poem stanza via complicated/silly rules"""
