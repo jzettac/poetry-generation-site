@@ -133,13 +133,21 @@ class Poem:
 
 
     def __str__(self):
+        """Returns the string of the poem"""
         return self.generate_poem()
+
+    def site_rep(self):
+        """Returns the html-formatted poem string.
+        See site.py"""
+        self.generate_poem()
+        return self.full_poem.replace("\n","</br>")
+
 
 
 # TODO: indicate why a word doesn't generate a poem if it doesn't?
 # TODO the else
-p = Poem("bird")
-print(p)
+# p = Poem("bird")
+# print(p.site_rep())
 
 
 # TODO: use seed word (??? maybe?) to generate a title
