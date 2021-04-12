@@ -8,7 +8,7 @@ from poetry import Poem
 def poem():
     return '''
         <form action="/" method="post">
-            Input a word to inspire the poem generator: <input name="source_word" type="text" />
+            Input a word to inspire the poem generator: <input name="source_word" type="text" /><br>
             The default maximum length of lines in the poem is 48 characters. If you'd rather your poem have shorter or longer lines, input the max chars you want your line to have. (Must be > 33): <input name="max_len" type="text" />
             <input value="Create a poem" type="submit" />
         </form>
@@ -28,4 +28,13 @@ def generate_poem():
         p = Poem(source_word)
     return p.site_rep()
 
+
+
+
+from bottle import error
+@error(500)
+def error500(error):
+    return 'There was a problem generating your poem. :(<br> Try again with a different word! <a href="/">Home.</a>'
+
 run(host='localhost', port=8080, debug=True)
+
