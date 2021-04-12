@@ -13,4 +13,4 @@ I used a bunch of stuff built by [Allison Parrish](https://www.decontextualize.c
 
 As well as:
 
-* [https://github.com/jsvine/markovify](markovify) by [jsvine]()
+* [markovify](https://github.com/jsvine/markovify) by [jsvine]()
