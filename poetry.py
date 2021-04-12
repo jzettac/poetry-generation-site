@@ -23,7 +23,7 @@ class Poem:
         self.all_lines = generate_poetry_corpus_lines()
         self.by_rhyming_part = self.generate_rhyming_part_defaultdict(min_line_len,max_line_len)
         # Set up ability to seed by word, TODO neaten
-        self.seed_word = seed_word
+        self.seed_word = seed_word.lower()
         phones = pronouncing.phones_for_word(self.seed_word)[0]
         self.rhyming_part_for_word = pronouncing.rhyming_part(phones)
         # self.min_line_len = min_line_len
@@ -57,17 +57,26 @@ class Poem:
         lines = [line['s'] for line in self.all_lines]
         return random.choice(lines) # For example, a string: "And his nerves thrilled like throbbing violins"
 
-    def handle_line_punctuation(self, line):
+    def handle_line_punctuation(self, line, title=False):
         """Handles line-end punctuation for some fun verse finality"""
         replace_set = ",:;"
         maintain_set = "-!?."
-        if line[-1] in replace_set:
-            return line[:-1] + "."
-        elif line[-1] in maintain_set:
-            return line
+        if not title:
+            if line[-1] in replace_set:
+                return line[:-1] + "."
+            elif line[-1] in maintain_set:
+                return line
+            else:
+                return line + "."
         else:
-            return line + "."
+            if line[-1].isalpha():
+                return line.replace('"','').replace("'","")
+            else:
+                return line[:-1].replace('"','').replace("'","")
         
+    def generate_title(self):
+        lines_with_the = [line['s'] for line in self.all_lines if re.search(r"\bthe\b", line['s'], re.I)]
+        self.title = self.handle_line_punctuation(random.choice(lines_with_the), title=True)
 
     def generate_stanza(self):
         """Generates one poem stanza via complicated/silly rules"""
@@ -112,7 +121,8 @@ class Poem:
         # TODO full idea here is that there can be input to the stanza generator that happens here (in the poem generator) -- break up the machine
 
         # TODO clean up all the silly additional newline char concats
-
+        self.generate_title() # TODO? for now anothe method above
+    
         self.full_poem = ""
         # If each stanza using all the rhymes will be 
         # if len(self.by_rhyming_part[self.rhyming_part_for_word].keys()) <= 3:
@@ -125,10 +135,6 @@ class Poem:
         self.full_poem += "\n\n"
         self.full_poem += "\n".join(self.generate_stanza())
 
-        # if len(self.by_rhyming_part[self.rhyming_part_for_word].keys()) > 3:
-        #     self.full_poem += "\n".join(self.generate_stanza())
-        #     self.full_poem += "\n"
-        #     self.full_poem += "\n".join(self.generate_stanza())
         return self.full_poem
 
 
@@ -137,10 +143,11 @@ class Poem:
         return self.generate_poem()
 
     def site_rep(self):
-        """Returns the html-formatted poem string.
-        See site.py"""
+        """Returns an html-formatted poem string.
+        See site.py / self.generate_poem, self.generate_title"""
         self.generate_poem()
-        return self.full_poem.replace("\n","</br>")
+        poem_rep = self.full_poem.replace('\n','</br>')
+        return f"<h2><i>{self.title}</i></h2><br><br>{poem_rep}<br><br><a href='/'>Try again</a>"
 
 
 
