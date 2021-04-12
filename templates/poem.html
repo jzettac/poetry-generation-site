@@ -1,0 +1,13 @@
+<title>{{ poem_title} }</title>
+
+<h2><i>{{ poem_title }}</i></h2>
+<br>
+% for line in poem_text:
+    % if line == "\n":
+        <br>
+    % else:
+        {{ line }}<br>
+    % end
+% end
+<br><br>
+<a href="/">Try again.</a>

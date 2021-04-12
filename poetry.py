@@ -89,6 +89,7 @@ class Poem:
 
     def generate_stanza(self):
         """Generates one poem stanza via complicated/silly rules"""
+        # The stanza situation is a bit silly but who cares
         stanza_list = []
 
         # If there are at least 2 different words to rhyme from this word,
@@ -96,10 +97,9 @@ class Poem:
             rhyme_options_source = self.by_rhyming_part[self.rhyming_part_for_word]
             rhyming_options = list(rhyme_options_source.keys())
             random.shuffle(rhyming_options) # Don't always have the words that rhyme in the same order in each stanza
-            if len(rhyming_options) > 5: # Don't have it do more than # rhymes, too many
-                # TODO: select number here, maybe vary from 3 to 8 or something where possible - as limit, not actual count, using this if stmt
+            if len(rhyming_options) > 5: # Don't have it do more than 5 rhymes, too many
                 # TODO: some randomness in how many per stanza or something???
-                rhyming_options = rhyming_options[:5] # TODO variation here? Right now needs to be the same number as in if stmt bc indexing, but tbd
+                rhyming_options = rhyming_options[:5] # Right now needs to be the same number, tbd
             for k in rhyming_options:
                 stanza_list.append(random.choice(rhyme_options_source[k]))
             # Then follow with a (random) other line.
@@ -124,51 +124,35 @@ class Poem:
         return stanza_list
 
     def generate_poem(self):
-        # TODO checks in generate stanza could potentially go _here_ instead
-        # TODO add in certainty that there won't be too much repetition that's silly
-        # TODO maybe add in check in stanza that we don't use every single rhyme each time if there are > 5, but make sure to use a random set for each stanza !!
-        # TODO full idea here is that there can be input to the stanza generator that happens here (in the poem generator) -- break up the machine
 
         # TODO clean up all the silly additional newline char concats
-        self.generate_title() # TODO? for now anothe method above
+        # And maybe add addl checks/options/randomness
+        self.generate_title() # For now
     
         self.full_poem = ""
-        # If each stanza using all the rhymes will be 
-        # if len(self.by_rhyming_part[self.rhyming_part_for_word].keys()) <= 3:
 
         # Now: controlling len of stanza and such, but always doing 3
-        # TODO: input to control how many stanzas, or some element of randomness? (at least 2 or 3, not more than 5 or 6?)
+        # TODO: input to control how many stanzas, or some element of randomness?
         self.full_poem += "\n".join(self.generate_stanza())
         self.full_poem += "\n\n"
         self.full_poem += "\n".join(self.generate_stanza())
         self.full_poem += "\n\n"
         self.full_poem += "\n".join(self.generate_stanza())
-
+        self.full_poem_list = self.full_poem.split("\n")
         return self.full_poem
-
+        # return self.full_poem.split("\n") # debug
 
     def __str__(self):
         """Returns the string of the poem"""
         return self.generate_poem()
 
-    def site_rep(self):
+    def poem_site_rep(self):
         """Returns an html-formatted poem string.
         See site.py / self.generate_poem, self.generate_title"""
         self.generate_poem()
         poem_rep = self.full_poem.replace('\n','</br>')
-        return f"<h2><i>{self.title}</i></h2><br><br>{poem_rep}<br><br><a href='/'>Try again</a>"
-
-
-
-# TODO: indicate why a word doesn't generate a poem if it doesn't?
-# TODO the else
-# p = Poem("bird")
-# print(p.site_rep())
-
-
-# TODO: use seed word (??? maybe?) to generate a title
-# or: use a common word ??? with > ?? chars?? in the poem string itself to generate a title?
-# Anyway some way to generate and store a title
+        self.site_rep_text = poem_rep
+        # return f"<h2><i>{self.title}</i></h2><br><br>{poem_rep}<br><br><a href='/'>Try again</a>" # temp/test
 
 
 
@@ -177,23 +161,5 @@ class Poem:
 
 
 
-#### Expts
-
-# lines_with_word = [line['s'] for line in all_lines if re.search(fr"\b{selected_word}\b", line['s'], re.I)]
-# print(random.sample(lines_with_word,12))
-# # note: important that the sample amount not be longer than how many exist so can't just have a number if getting user input -- or have to handle that properly
-# # or could just pick from a selected set of words, tbd
 
 
-# set the amount of repetition -- like some value and determine what that means
-# and use that to determine whether 
-
-# could have some specification of rhyme schemes (AABB)
-# or surprise me
-
-
-# IDEAS:
-# Random lines could be a couplet OR a random line
-# Variation in numbers of rhymes per stanza > 3 and < say 8, up to limit of what there is
-
-# End with a couplet? Stanza, stanza, stanza-with-couplet. (Would help last lines feel final?) Or sometimes?
