@@ -1,4 +1,4 @@
-from bottle import route, run, get, post, request, error, SimpleTemplate
+from bottle import route, run, get, post, request, error, template
 from poetry import Poem
 
 # TODO: Templates, links to github repo etc
