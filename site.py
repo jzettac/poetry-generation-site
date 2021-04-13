@@ -26,9 +26,9 @@ def generate_poem():
 
 # Error handling
 
-# @error(500)
-# def error500(error):
-#     return 'There was a problem generating your poem. :(<br> Try again with a different word! <a href="/">Home.</a>'
+@error(500)
+def error500(error):
+    return template('templates/500.html')
 
 
 # Main
