@@ -6,6 +6,8 @@ name = "pypi"
 [packages]
 pronouncing = "*"
 bottle = "*"
+gunicorn = "*"
+werkzeug = "*"
 
 [dev-packages]
 
