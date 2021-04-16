@@ -33,6 +33,10 @@ def error500(error):
 
 # Main
 
-if __name__ == "__main__":
-    run(host='localhost', port=8080, debug=True)
+if __name__ == '__main__':
+
+    if os.environ.get('APP_LOCATION') == 'heroku':
+        run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
+    else:
+        run(host='localhost', port=8080, debug=True)
 
