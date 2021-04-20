@@ -1,5 +1,6 @@
 from bottle import route, run, get, post, request, error, template, static_file
 from poetry import Poem
+import os
 
 # Static files CSS
 @route('/static/css/<filename:re:.*\.css>')
